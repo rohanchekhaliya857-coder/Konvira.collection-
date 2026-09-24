@@ -70,7 +70,7 @@
       margin-bottom:18px;
     }
 
-    input, textarea, select{
+    input,textarea,select{
       width:100%;
       padding:12px;
       margin:7px 0 13px;
@@ -110,7 +110,7 @@
     }
 
     .hidden{
-      display:none;
+      display:none !important;
     }
 
     .top-actions{
@@ -199,6 +199,13 @@
       margin-bottom:15px;
     }
 
+    .reset-note{
+      font-size:13px;
+      color:#666;
+      margin-bottom:15px;
+      line-height:1.5;
+    }
+
     @media(max-width:600px){
       .container{
         padding:12px;
@@ -219,46 +226,67 @@
 
 <header>
   <h1>🛍️ KONVIRA Admin</h1>
-  <button id="logoutBtn" class="logout hidden">Logout</button>
+
+  <button id="logoutBtn" class="logout hidden">
+    Logout
+  </button>
 </header>
 
+
 <!-- LOGIN -->
+
 <div id="loginSection" class="login-box">
 
   <h2>Admin Login 🔐</h2>
 
-  <div id="loginMessage" class="message error"></div>
+  <div id="loginMessage" class="message"></div>
 
   <label>Email</label>
+
   <input
     id="loginEmail"
     type="email"
     placeholder="Admin email"
+    value="rohanchekhaliya857@gmail.com"
   >
 
   <label>Password</label>
+
   <input
     id="loginPassword"
     type="password"
     placeholder="Password"
   >
 
+  <button id="loginBtn" class="primary">
+    Login
+  </button>
+
   <button
-  id="forgotPasswordBtn"
-  class="gray"
-  style="width:100%;margin-top:10px;"
->
-  🔑 Forgot Password
-</button>
+    id="forgotPasswordBtn"
+    class="gray"
+    style="width:100%;margin-top:10px;"
+  >
+    🔑 Forgot Password
+  </button>
+
 </div>
+
+
 <!-- PASSWORD RESET -->
+
 <div id="resetSection" class="login-box hidden">
 
   <h2>🔐 Set New Password</h2>
 
+  <p class="reset-note">
+    Enter a new password for your KONVIRA Admin account.
+  </p>
+
   <div id="resetMessage" class="message"></div>
 
   <label>New Password</label>
+
   <input
     id="newPassword"
     type="password"
@@ -266,31 +294,7 @@
   >
 
   <label>Confirm Password</label>
-  <input
-    id="confirmPassword"
-    type="password"
-    placeholder="Confirm password"
-  >
 
-  <button id="updatePasswordBtn" class="primary">
-    Update Password
-  </button>
-
-</div><!-- PASSWORD RESET -->
-<div id="resetSection" class="login-box hidden">
-
-  <h2>🔐 Set New Password</h2>
-
-  <div id="resetMessage" class="message"></div>
-
-  <label>New Password</label>
-  <input
-    id="newPassword"
-    type="password"
-    placeholder="New password"
-  >
-
-  <label>Confirm Password</label>
   <input
     id="confirmPassword"
     type="password"
@@ -302,11 +306,14 @@
   </button>
 
 </div>
+
 
 <!-- ADMIN -->
+
 <div id="adminSection" class="container hidden">
 
   <div class="top-actions">
+
     <button id="addProductBtn" class="green">
       ➕ Add Product
     </button>
@@ -317,14 +324,19 @@
     >
       🌐 View Store
     </button>
+
   </div>
 
 
   <!-- PRODUCT FORM -->
+
   <div id="formPanel" class="panel hidden">
 
     <div class="form-title">
-      <h2 id="formTitle">Add Product</h2>
+
+      <h2 id="formTitle">
+        Add Product
+      </h2>
 
       <button
         id="cancelBtn"
@@ -332,11 +344,13 @@
       >
         Cancel
       </button>
+
     </div>
 
     <div id="formMessage" class="message"></div>
 
     <label>Product Name</label>
+
     <input
       id="productName"
       type="text"
@@ -344,6 +358,7 @@
     >
 
     <label>Price (₹)</label>
+
     <input
       id="productPrice"
       type="number"
@@ -352,6 +367,7 @@
     >
 
     <label>Category</label>
+
     <select id="productCategory">
       <option value="Daily Wear">Daily Wear</option>
       <option value="Festive">Festive</option>
@@ -361,6 +377,7 @@
     </select>
 
     <label>Product Photo URL</label>
+
     <input
       id="productImage"
       type="url"
@@ -368,12 +385,14 @@
     >
 
     <label>Description</label>
+
     <textarea
       id="productDescription"
       placeholder="Write product details..."
     ></textarea>
 
     <label>Stock Quantity</label>
+
     <input
       id="productStock"
       type="number"
@@ -393,7 +412,10 @@
 
     <br><br>
 
-    <button id="saveProductBtn" class="primary">
+    <button
+      id="saveProductBtn"
+      class="primary"
+    >
       💾 Save Product
     </button>
 
@@ -401,10 +423,17 @@
 
 
   <!-- PRODUCTS -->
-  <div class="panel" style="margin-top:20px;">
+
+  <div
+    class="panel"
+    style="margin-top:20px;"
+  >
 
     <div class="form-title">
-      <h2>Products</h2>
+
+      <h2>
+        Products
+      </h2>
 
       <button
         id="refreshBtn"
@@ -412,9 +441,13 @@
       >
         🔄 Refresh
       </button>
+
     </div>
 
-    <div id="productsMessage" class="message"></div>
+    <div
+      id="productsMessage"
+      class="message"
+    ></div>
 
     <div
       id="productsGrid"
@@ -436,7 +469,7 @@
     "https://icvhbuonnpaaqddwlxpl.supabase.co";
 
   const SUPABASE_KEY =
-  "sb_publishable_PqR6nsbDCiJ2TnHw2Yj5YQ_TWoBHgP_";
+    "sb_publishable_PqR6nsbDCiJ2TnHw2Yj5YQ_TWoBHgP_";
 
   const supabaseClient =
     supabase.createClient(
@@ -451,6 +484,9 @@
 
   const loginSection =
     document.getElementById("loginSection");
+
+  const resetSection =
+    document.getElementById("resetSection");
 
   const adminSection =
     document.getElementById("adminSection");
@@ -474,180 +510,12 @@
 
   document
     .getElementById("loginBtn")
-    .addEventListener("click", login);
-
-  /* =====================================
-   FORGOT PASSWORD
-====================================== */
-
-document
-  .getElementById("forgotPasswordBtn")
-  .addEventListener("click", forgotPassword);
-
-async function forgotPassword(){
-
-  const email =
-    document
-      .getElementById("loginEmail")
-      .value
-      .trim();
-
-  if(!email){
-
-    showMessage(
-      "loginMessage",
-      "Please enter your email first.",
-      "error"
+    .addEventListener(
+      "click",
+      login
     );
 
-    return;
-  }
 
-  const { error } =
-    await supabaseClient.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo:
-          "https://rohanchekhaliya857-coder.github.io/Konvira.collection-/admin.html"
-      }
-    );
-
-  if(error){
-
-    showMessage(
-      "loginMessage",
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-  showMessage(
-    "loginMessage",
-    "Password reset link sent! Check your email. ✅",
-    "success"
-  );
-} 
-
-/* =====================================
-   PASSWORD RECOVERY
-====================================== */
-
-supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
-
-    if(event === "PASSWORD_RECOVERY"){
-
-      loginSection.classList.add("hidden");
-
-      adminSection.classList.add("hidden");
-
-      logoutBtn.classList.add("hidden");
-
-      document
-        .getElementById("resetSection")
-        .classList.remove("hidden");
-    }
-
-  }
-);
-
-
-/* =====================================
-   UPDATE PASSWORD
-====================================== */
-
-document
-  .getElementById("updatePasswordBtn")
-  .addEventListener(
-    "click",
-    updatePassword
-  );
-
-
-async function updatePassword(){
-
-  const password =
-    document
-      .getElementById("newPassword")
-      .value;
-
-  const confirmPassword =
-    document
-      .getElementById("confirmPassword")
-      .value;
-
-
-  if(!password || !confirmPassword){
-
-    showMessage(
-      "resetMessage",
-      "Please enter both passwords.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if(password.length < 6){
-
-    showMessage(
-      "resetMessage",
-      "Password must be at least 6 characters.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if(password !== confirmPassword){
-
-    showMessage(
-      "resetMessage",
-      "Passwords do not match.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const { error } =
-    await supabaseClient.auth.updateUser({
-      password: password
-    });
-
-
-  if(error){
-
-    showMessage(
-      "resetMessage",
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  showMessage(
-    "resetMessage",
-    "Password updated successfully! ✅",
-    "success"
-  );
-
-
-  setTimeout(() => {
-
-    location.href =
-      "https://rohanchekhaliya857-coder.github.io/Konvira.collection-/admin.html";
-
-  },1500);
-
-}
   async function login(){
 
     const email =
@@ -692,7 +560,251 @@ async function updatePassword(){
       return;
     }
 
+
     showAdmin();
+
+  }
+
+
+  /* =====================================
+     FORGOT PASSWORD
+  ====================================== */
+
+  document
+    .getElementById("forgotPasswordBtn")
+    .addEventListener(
+      "click",
+      forgotPassword
+    );
+
+
+  async function forgotPassword(){
+
+    const email =
+      document
+        .getElementById("loginEmail")
+        .value
+        .trim();
+
+
+    if(!email){
+
+      showMessage(
+        "loginMessage",
+        "Please enter your email first.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const button =
+      document.getElementById(
+        "forgotPasswordBtn"
+      );
+
+
+    button.disabled = true;
+
+    button.textContent =
+      "Sending...";
+
+
+    const { error } =
+      await supabaseClient.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo:
+            "https://rohanchekhaliya857-coder.github.io/Konvira.collection-/admin.html"
+        }
+      );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "🔑 Forgot Password";
+
+
+    if(error){
+
+      showMessage(
+        "loginMessage",
+        error.message,
+        "error"
+      );
+
+      return;
+    }
+
+
+    showMessage(
+      "loginMessage",
+      "Password reset email sent. Check your Gmail. ✅",
+      "success"
+    );
+
+  }
+
+
+  /* =====================================
+     AUTH STATE
+  ====================================== */
+
+  supabaseClient.auth.onAuthStateChange(
+    async (event, session) => {
+
+      if(event === "PASSWORD_RECOVERY"){
+
+        loginSection.classList.add("hidden");
+
+        adminSection.classList.add("hidden");
+
+        logoutBtn.classList.add("hidden");
+
+        resetSection.classList.remove("hidden");
+
+        return;
+      }
+
+
+      if(
+        event === "SIGNED_IN" &&
+        session
+      ){
+
+        if(
+          !resetSection.classList.contains(
+            "hidden"
+          )
+        ){
+
+          return;
+        }
+
+        showAdmin();
+
+      }
+
+    }
+  );
+
+
+  /* =====================================
+     UPDATE PASSWORD
+  ====================================== */
+
+  document
+    .getElementById("updatePasswordBtn")
+    .addEventListener(
+      "click",
+      updatePassword
+    );
+
+
+  async function updatePassword(){
+
+    const password =
+      document
+        .getElementById("newPassword")
+        .value;
+
+    const confirmPassword =
+      document
+        .getElementById("confirmPassword")
+        .value;
+
+
+    if(!password || !confirmPassword){
+
+      showMessage(
+        "resetMessage",
+        "Please enter both passwords.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(password.length < 6){
+
+      showMessage(
+        "resetMessage",
+        "Password must be at least 6 characters.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(password !== confirmPassword){
+
+      showMessage(
+        "resetMessage",
+        "Passwords do not match.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const button =
+      document.getElementById(
+        "updatePasswordBtn"
+      );
+
+
+    button.disabled = true;
+
+    button.textContent =
+      "Updating...";
+
+
+    const { error } =
+      await supabaseClient.auth.updateUser({
+        password
+      });
+
+
+    if(error){
+
+      button.disabled = false;
+
+      button.textContent =
+        "Update Password";
+
+      showMessage(
+        "resetMessage",
+        error.message,
+        "error"
+      );
+
+      return;
+    }
+
+
+    showMessage(
+      "resetMessage",
+      "Password updated successfully! ✅",
+      "success"
+    );
+
+
+    setTimeout(
+      async () => {
+
+        await supabaseClient.auth.signOut();
+
+        window.location.href =
+          "https://rohanchekhaliya857-coder.github.io/Konvira.collection-/admin.html";
+
+      },
+      1500
+    );
 
   }
 
@@ -705,7 +817,8 @@ async function updatePassword(){
 
     const {
       data: { session }
-    } = await supabaseClient.auth.getSession();
+    } =
+      await supabaseClient.auth.getSession();
 
 
     if(session){
@@ -722,6 +835,8 @@ async function updatePassword(){
   ====================================== */
 
   function showAdmin(){
+
+    resetSection.classList.add("hidden");
 
     loginSection.classList.add("hidden");
 
@@ -762,12 +877,16 @@ async function updatePassword(){
 
         editingProductId = null;
 
-        document.getElementById("formTitle")
-          .textContent = "Add Product";
+        document
+          .getElementById("formTitle")
+          .textContent =
+          "Add Product";
 
         clearForm();
 
-        formPanel.classList.remove("hidden");
+        formPanel.classList.remove(
+          "hidden"
+        );
 
         window.scrollTo({
           top:0,
@@ -788,7 +907,9 @@ async function updatePassword(){
       "click",
       () => {
 
-        formPanel.classList.add("hidden");
+        formPanel.classList.add(
+          "hidden"
+        );
 
         editingProductId = null;
 
@@ -886,7 +1007,8 @@ async function updatePassword(){
       description,
       stock,
       is_active,
-      updated_at:new Date().toISOString()
+      updated_at:
+        new Date().toISOString()
 
     };
 
@@ -900,14 +1022,19 @@ async function updatePassword(){
         await supabaseClient
           .from("products")
           .update(productData)
-          .eq("id", editingProductId);
+          .eq(
+            "id",
+            editingProductId
+          );
 
     }else{
 
       result =
         await supabaseClient
           .from("products")
-          .insert(productData);
+          .insert(
+            productData
+          );
 
     }
 
@@ -935,8 +1062,10 @@ async function updatePassword(){
 
     editingProductId = null;
 
-    document.getElementById("formTitle")
-      .textContent = "Add Product";
+    document
+      .getElementById("formTitle")
+      .textContent =
+      "Add Product";
 
 
     await loadProducts();
@@ -961,9 +1090,12 @@ async function updatePassword(){
       await supabaseClient
         .from("products")
         .select("*")
-        .order("created_at", {
-          ascending:false
-        });
+        .order(
+          "created_at",
+          {
+            ascending:false
+          }
+        );
 
 
     if(error){
@@ -992,9 +1124,12 @@ async function updatePassword(){
     data.forEach(product => {
 
       const card =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
-      card.className = "product";
+      card.className =
+        "product";
 
 
       const image =
@@ -1027,7 +1162,11 @@ async function updatePassword(){
           <div class="stock">
             Stock: ${product.stock}
             |
-            ${product.is_active ? "🟢 Active" : "🔴 Hidden"}
+            ${
+              product.is_active
+                ? "🟢 Active"
+                : "🔴 Hidden"
+            }
           </div>
 
           <div class="actions">
@@ -1053,7 +1192,9 @@ async function updatePassword(){
       `;
 
 
-      productsGrid.appendChild(card);
+      productsGrid.appendChild(
+        card
+      );
 
     });
 
@@ -1073,7 +1214,7 @@ async function updatePassword(){
       await supabaseClient
         .from("products")
         .select("*")
-        .eq("id", id)
+        .eq("id",id)
         .single();
 
 
@@ -1088,33 +1229,58 @@ async function updatePassword(){
     editingProductId = id;
 
 
-    document.getElementById("formTitle")
-      .textContent = "Edit Product";
+    document
+      .getElementById("formTitle")
+      .textContent =
+      "Edit Product";
 
 
-    document.getElementById("productName")
-      .value = data.name || "";
-
-    document.getElementById("productPrice")
-      .value = data.price ?? 659;
-
-    document.getElementById("productCategory")
-      .value = data.category || "3-Piece";
-
-    document.getElementById("productImage")
-      .value = data.image_url || "";
-
-    document.getElementById("productDescription")
-      .value = data.description || "";
-
-    document.getElementById("productStock")
-      .value = data.stock ?? 0;
-
-    document.getElementById("productActive")
-      .checked = data.is_active !== false;
+    document
+      .getElementById("productName")
+      .value =
+      data.name || "";
 
 
-    formPanel.classList.remove("hidden");
+    document
+      .getElementById("productPrice")
+      .value =
+      data.price ?? 659;
+
+
+    document
+      .getElementById("productCategory")
+      .value =
+      data.category || "3-Piece";
+
+
+    document
+      .getElementById("productImage")
+      .value =
+      data.image_url || "";
+
+
+    document
+      .getElementById("productDescription")
+      .value =
+      data.description || "";
+
+
+    document
+      .getElementById("productStock")
+      .value =
+      data.stock ?? 0;
+
+
+    document
+      .getElementById("productActive")
+      .checked =
+      data.is_active !== false;
+
+
+    formPanel.classList.remove(
+      "hidden"
+    );
+
 
     window.scrollTo({
       top:0,
@@ -1136,7 +1302,8 @@ async function updatePassword(){
       );
 
 
-    if(!confirmDelete) return;
+    if(!confirmDelete)
+      return;
 
 
     const {
@@ -1145,7 +1312,7 @@ async function updatePassword(){
       await supabaseClient
         .from("products")
         .delete()
-        .eq("id", id);
+        .eq("id",id);
 
 
     if(error){
@@ -1167,25 +1334,39 @@ async function updatePassword(){
 
   function clearForm(){
 
-    document.getElementById("productName")
+    document
+      .getElementById("productName")
       .value = "";
 
-    document.getElementById("productPrice")
+
+    document
+      .getElementById("productPrice")
       .value = 659;
 
-    document.getElementById("productCategory")
-      .value = "Daily Wear";
 
-    document.getElementById("productImage")
+    document
+      .getElementById("productCategory")
+      .value =
+      "Daily Wear";
+
+
+    document
+      .getElementById("productImage")
       .value = "";
 
-    document.getElementById("productDescription")
+
+    document
+      .getElementById("productDescription")
       .value = "";
 
-    document.getElementById("productStock")
+
+    document
+      .getElementById("productStock")
       .value = 1;
 
-    document.getElementById("productActive")
+
+    document
+      .getElementById("productActive")
       .checked = true;
 
   }
@@ -1204,28 +1385,28 @@ async function updatePassword(){
     const box =
       document.getElementById(id);
 
-    box.textContent = text;
+
+    box.textContent =
+      text;
+
 
     box.className =
       "message " +
-      (type === "success"
-        ? "success"
-        : "error");
+      (
+        type === "success"
+          ? "success"
+          : "error"
+      );
 
-    box.style.display = "block";
 
-
-    setTimeout(() => {
-
-      box.style.display = "none";
-
-    },5000);
+    box.style.display =
+      "block";
 
   }
 
 
   /* =====================================
-     BASIC HTML ESCAPE
+     HTML ESCAPE
   ====================================== */
 
   function escapeHtml(value){
