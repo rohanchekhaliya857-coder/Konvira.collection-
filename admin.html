@@ -251,7 +251,57 @@
   🔑 Forgot Password
 </button>
 </div>
+<!-- PASSWORD RESET -->
+<div id="resetSection" class="login-box hidden">
 
+  <h2>🔐 Set New Password</h2>
+
+  <div id="resetMessage" class="message"></div>
+
+  <label>New Password</label>
+  <input
+    id="newPassword"
+    type="password"
+    placeholder="New password"
+  >
+
+  <label>Confirm Password</label>
+  <input
+    id="confirmPassword"
+    type="password"
+    placeholder="Confirm password"
+  >
+
+  <button id="updatePasswordBtn" class="primary">
+    Update Password
+  </button>
+
+</div><!-- PASSWORD RESET -->
+<div id="resetSection" class="login-box hidden">
+
+  <h2>🔐 Set New Password</h2>
+
+  <div id="resetMessage" class="message"></div>
+
+  <label>New Password</label>
+  <input
+    id="newPassword"
+    type="password"
+    placeholder="New password"
+  >
+
+  <label>Confirm Password</label>
+  <input
+    id="confirmPassword"
+    type="password"
+    placeholder="Confirm password"
+  >
+
+  <button id="updatePasswordBtn" class="primary">
+    Update Password
+  </button>
+
+</div>
 
 <!-- ADMIN -->
 <div id="adminSection" class="container hidden">
@@ -426,7 +476,178 @@
     .getElementById("loginBtn")
     .addEventListener("click", login);
 
+  /* =====================================
+   FORGOT PASSWORD
+====================================== */
 
+document
+  .getElementById("forgotPasswordBtn")
+  .addEventListener("click", forgotPassword);
+
+async function forgotPassword(){
+
+  const email =
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
+  if(!email){
+
+    showMessage(
+      "loginMessage",
+      "Please enter your email first.",
+      "error"
+    );
+
+    return;
+  }
+
+  const { error } =
+    await supabaseClient.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo:
+          "https://rohanchekhaliya857-coder.github.io/Konvira.collection-/admin.html"
+      }
+    );
+
+  if(error){
+
+    showMessage(
+      "loginMessage",
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+  showMessage(
+    "loginMessage",
+    "Password reset link sent! Check your email. ✅",
+    "success"
+  );
+} 
+
+/* =====================================
+   PASSWORD RECOVERY
+====================================== */
+
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
+
+    if(event === "PASSWORD_RECOVERY"){
+
+      loginSection.classList.add("hidden");
+
+      adminSection.classList.add("hidden");
+
+      logoutBtn.classList.add("hidden");
+
+      document
+        .getElementById("resetSection")
+        .classList.remove("hidden");
+    }
+
+  }
+);
+
+
+/* =====================================
+   UPDATE PASSWORD
+====================================== */
+
+document
+  .getElementById("updatePasswordBtn")
+  .addEventListener(
+    "click",
+    updatePassword
+  );
+
+
+async function updatePassword(){
+
+  const password =
+    document
+      .getElementById("newPassword")
+      .value;
+
+  const confirmPassword =
+    document
+      .getElementById("confirmPassword")
+      .value;
+
+
+  if(!password || !confirmPassword){
+
+    showMessage(
+      "resetMessage",
+      "Please enter both passwords.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(password.length < 6){
+
+    showMessage(
+      "resetMessage",
+      "Password must be at least 6 characters.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(password !== confirmPassword){
+
+    showMessage(
+      "resetMessage",
+      "Passwords do not match.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const { error } =
+    await supabaseClient.auth.updateUser({
+      password: password
+    });
+
+
+  if(error){
+
+    showMessage(
+      "resetMessage",
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+
+  showMessage(
+    "resetMessage",
+    "Password updated successfully! ✅",
+    "success"
+  );
+
+
+  setTimeout(() => {
+
+    location.href =
+      "https://rohanchekhaliya857-coder.github.io/Konvira.collection-/admin.html";
+
+  },1500);
+
+}
   async function login(){
 
     const email =
