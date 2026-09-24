@@ -593,8 +593,26 @@ footer{
           <input type="hidden" name="total_amount" id="totalAmount">
 
           <button class="submit-order" type="submit">
-            Confirm Order
-          </button>
+  Confirm Order
+</button>
+
+<button
+  type="button"
+  onclick="sendOrderToWhatsApp()"
+  style="
+    width:100%;
+    margin-top:10px;
+    padding:13px;
+    background:#25D366;
+    color:white;
+    border:0;
+    border-radius:9px;
+    font-weight:bold;
+    cursor:pointer;
+  "
+>
+  💬 Order on WhatsApp
+</button>
 
         </form>
 
@@ -1068,8 +1086,125 @@ document
   submitButton.disabled = false;
   submitButton.textContent = "Confirm Order";
 
-});
+});function sendOrderToWhatsApp(){
 
+  if(cart.length === 0){
+    alert("Please add a product to cart first.");
+    return;
+  }
+
+  const name =
+    document.getElementById("customerName").value.trim();
+
+  const phone =
+    document.getElementById("customerPhone").value.trim();
+
+  const address =
+    document.getElementById("customerAddress").value.trim();
+
+  const instructions =
+    document.getElementById("instructions").value.trim();
+
+  if(!name || !phone || !address){
+    alert("Please fill Name, Phone and Address.");
+    return;
+  }
+
+  let message =
+`Hello KONVIRA Collection 👋
+
+I would like to place an order:
+
+KONVIRA COLLECTION — NEW ORDER
+
+`;
+
+  let total = 0;
+
+  cart.forEach((item, index) => {
+
+    const subtotal = item.price * item.qty;
+
+    total += subtotal;
+
+    message +=
+`${index + 1}. ${item.name} | Qty: ${item.qty} | Price: ₹${item.price} | Subtotal: ₹${subtotal}
+
+`;
+
+  });
+
+  message +=
+`GRAND TOTAL: ₹${total}
+
+CUSTOMER
+Name: ${name}
+Phone: ${phone}
+Address: ${address}
+Instructions: ${instructions || "None"}
+
+Please confirm availability, final price and delivery details. Thank you!`;
+
+  const whatsappURL =
+    "https://wa.me/918956821147?text=" +
+    encodeURIComponent(message);
+
+  window.open(whatsappURL, "_blank");
+}
+function sendOrderToWhatsApp(){
+
+  if(cart.length === 0){
+    alert("Please add a product to cart first.");
+    return;
+  }
+
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const address = document.getElementById("customerAddress").value.trim();
+  const instructions = document.getElementById("instructions").value.trim();
+
+  if(!name || !phone || !address){
+    alert("Please fill Name, Phone and Address.");
+    return;
+  }
+
+  let message = `Hello KONVIRA Collection 👋
+
+I would like to place an order:
+
+KONVIRA COLLECTION — NEW ORDER
+
+`;
+
+  let total = 0;
+
+  cart.forEach((item, index) => {
+
+    const subtotal = item.price * item.qty;
+
+    total += subtotal;
+
+    message += `${index + 1}. ${item.name} | Qty: ${item.qty} | Price: ₹${item.price} | Subtotal: ₹${subtotal}
+
+`;
+  });
+
+  message += `GRAND TOTAL: ₹${total}
+
+CUSTOMER
+Name: ${name}
+Phone: ${phone}
+Address: ${address}
+Instructions: ${instructions || "None"}
+
+Please confirm availability, final price and delivery details. Thank you!`;
+
+  const whatsappURL =
+    "https://wa.me/918956821147?text=" +
+    encodeURIComponent(message);
+
+  window.open(whatsappURL, "_blank");
+}
 renderProducts();
 updateCartCount();
 
