@@ -637,478 +637,371 @@ footer{
   </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+const SUPABASE_URL =
+  "https://icvhbuonnpaaqddwlxpl.supabase.co";
 
-const IMAGE =
-"https://i.ibb.co/fzqPs2VS/IMG-20260922-WA0226.jpg";
+const SUPABASE_KEY =
+  "sb_publishable_PqR6nsbDCiJ2TnHw2Yj5YQ_TWoBHgP_";
 
-const products = [
+const supabaseClient =
+  window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  {
-    id:1,
-    name:"Elegant Floral 3-Piece Set",
-    price:659,
-    category:"Daily Wear",
-    image:IMAGE
-  },
+let products = [];
+let cart = JSON.parse(localStorage.getItem("konviraCart") || "[]");
+let currentCategory = "All";
 
-  {
-    id:2,
-    name:"Premium Printed 3-Piece Set",
-    price:659,
-    category:"Daily Wear",
-    image:IMAGE
-  },
+/* ---------- LOAD PRODUCTS FROM SUPABASE ---------- */
 
-  {
-    id:3,
-    name:"Classic Ethnic 3-Piece Set",
-    price:659,
-    category:"Festive",
-    image:IMAGE
-  },
-
-  {
-    id:4,
-    name:"Designer Festive 3-Piece Set",
-    price:659,
-    category:"Festive",
-    image:IMAGE
-  },
-
-  {
-    id:5,
-    name:"Stylish Party Wear Set",
-    price:659,
-    category:"Party Wear",
-    image:IMAGE
-  },
-
-  {
-    id:6,
-    name:"Modern Ethnic 3-Piece Set",
-    price:659,
-    category:"Party Wear",
-    image:IMAGE
-  },
-
-  {
-    id:7,
-    name:"Comfort Daily Wear Set",
-    price:659,
-    category:"Daily Wear",
-    image:IMAGE
-  },
-
-  {
-    id:8,
-    name:"Premium Collection Set",
-    price:659,
-    category:"Festive",
-    image:IMAGE
-  }
-
-];
-
-let cart = JSON.parse(localStorage.getItem("konviraCart")) || [];
-
-function saveCart(){
-  localStorage.setItem("konviraCart", JSON.stringify(cart));
-}
-
-function renderProducts(list = products){
-
+async function loadProducts() {
   const grid = document.getElementById("productGrid");
 
-  grid.innerHTML = "";
+  if (grid) {
+    grid.innerHTML =
+      '<p style="text-align:center;padding:30px;">Loading products...</p>';
+  }
 
-  list.forEach(product => {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
 
-    grid.innerHTML += `
+  if (error) {
+    console.error("Supabase error:", error);
 
-      <div class="product">
+    if (grid) {
+      grid.innerHTML =
+        '<p style="text-align:center;padding:30px;">Products load nahi ho rahe. Please refresh.</p>';
+    }
+
+    return;
+  }
+
+  products = data || [];
+  renderProducts();
+  updateCartCount();
+}
+
+/* ---------- ESCAPE HTML ---------- */
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/* ---------- RENDER PRODUCTS ---------- */
+
+function renderProducts() {
+  const grid = document.getElementById("productGrid");
+
+  if (!grid) return;
+
+  let filtered = products;
+
+  if (currentCategory !== "All") {
+    filtered = products.filter(
+      p => p.category === currentCategory
+    );
+  }
+
+  if (!filtered.length) {
+    grid.innerHTML =
+      '<p style="text-align:center;padding:30px;">No products available.</p>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(product => {
+
+    const price = Number(product.price || 0);
+    const stock = Number(product.stock || 0);
+
+    return `
+      <div class="product-card">
 
         <img
-          src="${product.image}"
-          alt="${product.name}"
+          src="${escapeHTML(product.image_url)}"
+          alt="${escapeHTML(product.name)}"
           loading="lazy"
         >
 
         <div class="product-info">
 
-          <h3>${product.name}</h3>
+          <h3>${escapeHTML(product.name)}</h3>
 
-          <div class="category">
-            ${product.category}
+          <p>${escapeHTML(product.description || "")}</p>
+
+          <div class="product-price">
+            ₹${price.toLocaleString("en-IN")}
           </div>
 
-          <div class="price">
-            ₹${product.price}
-          </div>
-
-          <button
-            class="add-btn"
-            onclick="addToCart(${product.id})"
-          >
-            Add to Cart
-          </button>
+          ${
+            stock > 0
+              ? `
+                <button
+                  class="add-cart"
+                  onclick="addToCart('${product.id}')">
+                  Add to Cart
+                </button>
+              `
+              : `
+                <button
+                  class="add-cart"
+                  disabled>
+                  Out of Stock
+                </button>
+              `
+          }
 
         </div>
-
       </div>
-
     `;
-
-  });
-
+  }).join("");
 }
 
-function filterProducts(category,button){
+/* ---------- CATEGORY FILTER ---------- */
 
-  document.querySelectorAll(".filter").forEach(btn=>{
-    btn.classList.remove("active");
-  });
+function filterProducts(category, button) {
+  currentCategory = category;
 
-  button.classList.add("active");
+  document
+    .querySelectorAll(".filter")
+    .forEach(btn => btn.classList.remove("active"));
 
-  if(category === "All"){
-    renderProducts(products);
-  }else{
-    renderProducts(
-      products.filter(p => p.category === category)
-    );
+  if (button) {
+    button.classList.add("active");
   }
 
+  renderProducts();
 }
 
-function addToCart(id){
+/* ---------- CART ---------- */
 
-  const existing = cart.find(item => item.id === id);
+function addToCart(productId) {
 
-  if(existing){
+  const product = products.find(
+    p => String(p.id) === String(productId)
+  );
+
+  if (!product) return;
+
+  const stock = Number(product.stock || 0);
+
+  if (stock <= 0) {
+    alert("This product is out of stock.");
+    return;
+  }
+
+  const existing = cart.find(
+    item => String(item.id) === String(productId)
+  );
+
+  if (existing) {
+
+    if (existing.qty >= stock) {
+      alert("Maximum available stock reached.");
+      return;
+    }
+
     existing.qty++;
-  }else{
 
-    const product = products.find(p => p.id === id);
+  } else {
 
     cart.push({
-      ...product,
-      qty:1
+      id: product.id,
+      name: product.name,
+      price: Number(product.price || 0),
+      image_url: product.image_url,
+      qty: 1
     });
-
   }
 
   saveCart();
   updateCartCount();
-
-  alert("Added to cart ✓");
-
+  renderCart();
 }
 
-function updateCartCount(){
+/* ---------- CHANGE QUANTITY ---------- */
+
+function changeQty(productId, amount) {
+
+  const item = cart.find(
+    item => String(item.id) === String(productId)
+  );
+
+  if (!item) return;
+
+  const product = products.find(
+    p => String(p.id) === String(productId)
+  );
+
+  const stock = Number(product?.stock || 0);
+
+  item.qty += amount;
+
+  if (item.qty <= 0) {
+    cart = cart.filter(
+      i => String(i.id) !== String(productId)
+    );
+  } else if (stock > 0 && item.qty > stock) {
+    item.qty = stock;
+    alert("Maximum available stock reached.");
+  }
+
+  saveCart();
+  updateCartCount();
+  renderCart();
+}
+
+/* ---------- REMOVE ---------- */
+
+function removeItem(productId) {
+
+  cart = cart.filter(
+    item => String(item.id) !== String(productId)
+  );
+
+  saveCart();
+  updateCartCount();
+  renderCart();
+}
+
+/* ---------- SAVE CART ---------- */
+
+function saveCart() {
+  localStorage.setItem(
+    "konviraCart",
+    JSON.stringify(cart)
+  );
+}
+
+/* ---------- CART COUNT ---------- */
+
+function updateCartCount() {
 
   const count = cart.reduce(
-    (sum,item)=>sum + item.qty,
+    (total, item) => total + Number(item.qty || 0),
     0
   );
 
-  document.getElementById("cartCount").textContent = count;
+  const elements = document.querySelectorAll(
+    "#cartCount, .cart-count"
+  );
 
+  elements.forEach(el => {
+    el.textContent = count;
+  });
 }
 
-function openCart(){
+/* ---------- CART RENDER ---------- */
 
-  document.getElementById("overlay")
-    .classList.add("show");
+function renderCart() {
 
-  renderCart();
+  const cartItems = document.getElementById("cartItems");
+  const cartTotal = document.getElementById("cartTotal");
 
-}
+  if (!cartItems) return;
 
-function closeCart(){
+  if (!cart.length) {
 
-  document.getElementById("overlay")
-    .classList.remove("show");
+    cartItems.innerHTML =
+      '<p style="text-align:center;padding:20px;">Your cart is empty.</p>';
 
-}
-
-function renderCart(){
-
-  const container =
-    document.getElementById("cartItems");
-
-  const bottom =
-    document.getElementById("cartBottom");
-
-  if(cart.length === 0){
-
-    container.innerHTML = `
-      <div class="empty">
-        <h3>Your cart is empty</h3>
-        <p>Add some beautiful outfits first.</p>
-      </div>
-    `;
+    if (cartTotal) {
+      cartTotal.textContent = "₹0";
+    }
 
     return;
-
   }
 
   let total = 0;
 
-  container.innerHTML = "";
+  cartItems.innerHTML = cart.map(item => {
 
-  cart.forEach(item => {
+    const subtotal =
+      Number(item.price) * Number(item.qty);
 
-    const itemTotal = item.price * item.qty;
+    total += subtotal;
 
-    total += itemTotal;
-
-    container.innerHTML += `
-
+    return `
       <div class="cart-item">
 
         <img
-          src="${item.image}"
-          alt="${item.name}"
+          src="${escapeHTML(item.image_url || "")}"
+          alt="${escapeHTML(item.name)}"
         >
 
-        <div class="cart-item-info">
+        <div>
+          <strong>${escapeHTML(item.name)}</strong>
 
-          <h4>${item.name}</h4>
-
-          <div class="item-price">
-            ₹${item.price}
+          <div>
+            ₹${Number(item.price).toLocaleString("en-IN")}
           </div>
 
-          <div class="qty">
+          <div class="quantity-controls">
 
-            <button onclick="changeQty(${item.id},-1)">
+            <button onclick="changeQty('${item.id}', -1)">
               −
             </button>
 
-            <strong>${item.qty}</strong>
+            <span>${item.qty}</span>
 
-            <button onclick="changeQty(${item.id},1)">
+            <button onclick="changeQty('${item.id}', 1)">
               +
             </button>
 
           </div>
 
-          <button
-            class="remove"
-            onclick="removeItem(${item.id})"
-          >
+          <button onclick="removeItem('${item.id}')">
             Remove
           </button>
 
         </div>
 
       </div>
-
     `;
 
-  });
+  }).join("");
 
-  document.getElementById("cartTotal").textContent =
-    "₹" + total;
-
-}
-
-function changeQty(id,change){
-
-  const item = cart.find(item => item.id === id);
-
-  if(!item) return;
-
-  item.qty += change;
-
-  if(item.qty <= 0){
-    cart = cart.filter(item => item.id !== id);
+  if (cartTotal) {
+    cartTotal.textContent =
+      "₹" + total.toLocaleString("en-IN");
   }
-
-  saveCart();
-  updateCartCount();
-  renderCart();
-
 }
 
-function removeItem(id){
+/* ---------- WHATSAPP ORDER ---------- */
 
-  cart = cart.filter(item => item.id !== id);
-
-  saveCart();
-  updateCartCount();
-  renderCart();
-
-}
-
-function showOrderForm(){
-
-  if(cart.length === 0){
-    alert("Please add a product to cart first.");
-    return;
-  }
-
-  document
-    .getElementById("orderForm")
-    .classList.add("show");
-
-  document
-    .getElementById("orderForm")
-    .scrollIntoView({
-      behavior:"smooth"
-    });
-
-}
-
-function makeOrderSummary(){
-
-  let summary = "";
-
-  cart.forEach(item => {
-
-    summary +=
-      item.name +
-      " × " +
-      item.qty +
-      " = ₹" +
-      (item.price * item.qty) +
-      "\n";
-
-  });
-
-  const total = cart.reduce(
-    (sum,item)=>sum + item.price * item.qty,
-    0
-  );
-
-  summary += "\nTOTAL: ₹" + total;
-
-  return {
-    summary,
-    total
-  };
-
-}
-
-document
-.getElementById("orderFormElement")
-.addEventListener("submit", async function(e){
-
-  e.preventDefault();
+function sendOrderToWhatsApp() {
 
   const name =
-    document.getElementById("customerName").value.trim();
+    document.getElementById("customerName")?.value.trim() || "";
 
   const phone =
-    document.getElementById("customerPhone").value.trim();
+    document.getElementById("customerPhone")?.value.trim() || "";
 
   const address =
-    document.getElementById("customerAddress").value.trim();
-
-  if(!/^[0-9]{10}$/.test(phone)){
-    alert("Please enter a valid 10 digit mobile number.");
-    return;
-  }
-
-  const order = makeOrderSummary();
-
-  document.getElementById("orderDetails").value =
-    order.summary;
-
-  document.getElementById("totalAmount").value =
-    "₹" + order.total;
-
-  const submitButton =
-    document.querySelector(".submit-order");
-
-  submitButton.disabled = true;
-  submitButton.textContent = "Placing Order...";
-
-  try{
-
-    const formData =
-      new FormData(this);
-
-    const response = await fetch(
-      "https://formspree.io/f/mzezgvye",
-      {
-        method:"POST",
-        body:formData,
-        headers:{
-          "Accept":"application/json"
-        }
-      }
-    );
-
-    if(response.ok){
-
-      cart = [];
-
-      saveCart();
-
-      updateCartCount();
-
-      document.getElementById("orderForm")
-        .classList.remove("show");
-
-      document.getElementById("cartItems")
-        .innerHTML = "";
-
-      document.getElementById("cartBottom")
-        .querySelector(".total").style.display="none";
-
-      document.querySelector(".checkout")
-        .style.display="none";
-
-      document.getElementById("successBox")
-        .classList.add("show");
-
-      this.reset();
-
-    }else{
-
-      alert(
-        "Order submit nahi hua. Please WhatsApp par order bheje."
-      );
-
-    }
-
-  }catch(error){
-
-    alert(
-      "Internet/Form error. Please WhatsApp par order bheje."
-    );
-
-  }
-
-  submitButton.disabled = false;
-  submitButton.textContent = "Confirm Order";
-
-});function sendOrderToWhatsApp(){
-
-  if(cart.length === 0){
-    alert("Please add a product to cart first.");
-    return;
-  }
-
-  const name =
-    document.getElementById("customerName").value.trim();
-
-  const phone =
-    document.getElementById("customerPhone").value.trim();
-
-  const address =
-    document.getElementById("customerAddress").value.trim();
+    document.getElementById("customerAddress")?.value.trim() || "";
 
   const instructions =
-    document.getElementById("instructions").value.trim();
+    document.getElementById("customerInstructions")?.value.trim() || "";
 
-  if(!name || !phone || !address){
+  if (!name || !phone || !address) {
     alert("Please fill Name, Phone and Address.");
     return;
   }
+
+  if (!cart.length) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  let total = 0;
 
   let message =
 `Hello KONVIRA Collection 👋
@@ -1119,11 +1012,10 @@ KONVIRA COLLECTION — NEW ORDER
 
 `;
 
-  let total = 0;
-
   cart.forEach((item, index) => {
 
-    const subtotal = item.price * item.qty;
+    const subtotal =
+      Number(item.price) * Number(item.qty);
 
     total += subtotal;
 
@@ -1131,7 +1023,6 @@ KONVIRA COLLECTION — NEW ORDER
 `${index + 1}. ${item.name} | Qty: ${item.qty} | Price: ₹${item.price} | Subtotal: ₹${subtotal}
 
 `;
-
   });
 
   message +=
@@ -1151,62 +1042,14 @@ Please confirm availability, final price and delivery details. Thank you!`;
 
   window.open(whatsappURL, "_blank");
 }
-function sendOrderToWhatsApp(){
 
-  if(cart.length === 0){
-    alert("Please add a product to cart first.");
-    return;
-  }
+/* ---------- START ---------- */
 
-  const name = document.getElementById("customerName").value.trim();
-  const phone = document.getElementById("customerPhone").value.trim();
-  const address = document.getElementById("customerAddress").value.trim();
-  const instructions = document.getElementById("instructions").value.trim();
-
-  if(!name || !phone || !address){
-    alert("Please fill Name, Phone and Address.");
-    return;
-  }
-
-  let message = `Hello KONVIRA Collection 👋
-
-I would like to place an order:
-
-KONVIRA COLLECTION — NEW ORDER
-
-`;
-
-  let total = 0;
-
-  cart.forEach((item, index) => {
-
-    const subtotal = item.price * item.qty;
-
-    total += subtotal;
-
-    message += `${index + 1}. ${item.name} | Qty: ${item.qty} | Price: ₹${item.price} | Subtotal: ₹${subtotal}
-
-`;
-  });
-
-  message += `GRAND TOTAL: ₹${total}
-
-CUSTOMER
-Name: ${name}
-Phone: ${phone}
-Address: ${address}
-Instructions: ${instructions || "None"}
-
-Please confirm availability, final price and delivery details. Thank you!`;
-
-  const whatsappURL =
-    "https://wa.me/918956821147?text=" +
-    encodeURIComponent(message);
-
-  window.open(whatsappURL, "_blank");
-}
-renderProducts();
+loadProducts();
+renderCart();
 updateCartCount();
+
 </script>
+
 </body>
 </html>
