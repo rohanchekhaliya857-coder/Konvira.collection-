@@ -1049,9 +1049,10 @@ loadProducts();
 renderCart();
 updateCartCount();
 function openCart() {
-  const cartOverlay = document.getElementById("cartOverlay");
-  if (cartOverlay) {
-    cartOverlay.classList.add("active");
+  const overlay = document.getElementById("overlay");
+
+  if (overlay) {
+    overlay.classList.add("show");
   }
 
   renderCart();
@@ -1059,9 +1060,10 @@ function openCart() {
 }
 
 function closeCart() {
-  const cartOverlay = document.getElementById("cartOverlay");
-  if (cartOverlay) {
-    cartOverlay.classList.remove("active");
+  const overlay = document.getElementById("overlay");
+
+  if (overlay) {
+    overlay.classList.remove("show");
   }
 }
 </script>
