@@ -1048,7 +1048,22 @@ Please confirm availability, final price and delivery details. Thank you!`;
 loadProducts();
 renderCart();
 updateCartCount();
+function openCart() {
+  const cartOverlay = document.getElementById("cartOverlay");
+  if (cartOverlay) {
+    cartOverlay.classList.add("active");
+  }
 
+  renderCart();
+  updateCartCount();
+}
+
+function closeCart() {
+  const cartOverlay = document.getElementById("cartOverlay");
+  if (cartOverlay) {
+    cartOverlay.classList.remove("active");
+  }
+}
 </script>
 
 </body>
